@@ -55,6 +55,23 @@
     }
 
     /* ============================================================
+       APP TABS (Sub-header navigation)
+    ============================================================ */
+    .app-tabs {
+      display: flex; gap: 8px; padding: 0 16px; margin: 12px auto 20px;
+      max-width: 860px;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px; font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+      color: var(--muted); background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); cursor: pointer; transition: all .2s;
+      text-align: center;
+    }
+    .tab-btn.active {
+      background: var(--green-bg); color: var(--green); border-color: rgba(62,207,142,.3);
+    }
+
+    /* ============================================================
        TOPBAR
     ============================================================ */
     .topbar {
@@ -148,16 +165,13 @@
       font-family: var(--font-mono); font-size: 15px; color: var(--muted);
       text-align: center; background: var(--card);
       border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 12px 6px; outline: none;
+      padding: 12px 6px; outline: none; line-height: 20px;
       transition: border-color .15s, background .15s, color .15s;
-      width: 100%; min-width: 65px;
+      width: 100%; min-width: 65px; cursor: pointer; user-select: none;
       display: block;
-      -moz-appearance: textfield;
     }
-    .cell-input::-webkit-outer-spin-button,
-    .cell-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .cell-input:hover  { border-color: var(--border-md); color: var(--text); }
-    .cell-input:focus  { border-color: var(--green); color: var(--text); }
+    .cell-input.is-active { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); color: var(--text); }
     .cell-input.filled { color: var(--text); }
     .cell-input.is-error  { border-color: var(--red);   background: var(--red-bg);   color: var(--red);   }
 
@@ -259,6 +273,32 @@
     .card-input.is-error { border-color: var(--red); color: var(--red); }
 
     /* ============================================================
+       CAROUSEL & KEYPAD
+    ============================================================ */
+    .carousel-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    .carousel-view { flex: 1; display: flex; flex-direction: column; padding-bottom: 12px; }
+    
+    .keypad-container {
+      background: var(--card); border-top: 1px solid var(--border);
+      padding: 12px 16px 24px; margin: auto -16px -24px; box-shadow: 0 -4px 20px rgba(0,0,0,.4);
+    }
+    .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .key-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      font-family: var(--font-mono); font-size: 24px; font-weight: 500; border-radius: var(--radius-sm);
+      height: 54px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background .1s; user-select: none; touch-action: manipulation;
+    }
+    .key-btn:active { background: var(--border-md); }
+    .key-btn.key-action { font-family: var(--font-ui); font-size: 16px; color: var(--muted); }
+    .key-btn.key-next { background: var(--green); color: #0d1117; font-weight: 600; border-color: transparent; }
+    
+    .card-input { cursor: pointer; user-select: none; line-height: 20px; }
+    .card-input.is-active {
+      border-color: var(--green); box-shadow: 0 0 0 1px var(--green); color: var(--text);
+    }
+
+    /* ============================================================
        TOGGLE SWITCH
     ============================================================ */
     .view-toggle {
@@ -280,13 +320,16 @@
        PRINT & RESPONSIVE
     ============================================================ */
     @media print {
-      .topbar, .actions { display: none !important; }
+      .topbar, .actions, .view-toggle, .keypad-container { display: none !important; }
       body { background: #fff; color: #000; padding: 0; }
       .table-wrapper { overflow: visible; }
       .inv-table { min-width: 100%; }
     }
 
     @media (max-width: 500px) {
+      body.mode-cards { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+      body.mode-cards .container { flex: 1; display: flex; flex-direction: column; padding-bottom: 0px; }
+      body.mode-cards .carousel-container { flex: 1; justify-content: flex-start; }
       .topbar-meta { display: none; }
       .summary-grid { max-width: 100%; margin-left: 0; }
       .actions { justify-content: flex-start; }
@@ -307,22 +350,33 @@
     const html = htm.bind(h);
 
     /* ── Constants ─────────────────────────────────────────────── */
-    const DENOMS    = [2, 3, 4, 5, 10, 30, 50];
-    const LS_STATE  = 'lotto_v2_state';
-    const LS_META   = 'lotto_v2_meta';
+    const DENOMS         = [2, 3, 4, 5, 10, 30, 50];
+    const LS_STATE       = 'lotto_v2_state';
+    const LS_FLOAT_STATE = 'lotto_v2_float_state';
+    const LS_META        = 'lotto_v2_meta';
+    const LS_TAB         = 'lotto_v2_tab';
 
-    const FIELDS = [
+    const SHIFT_FIELDS = [
       { key: 'stock',     label: "Stock" },
       { key: 'activated', label: 'Activated' },
       { key: 'sold',      label: 'Sold' },
     ];
+    const FLOAT_FIELDS = [
+      { key: 'stock',     label: "Stock" },
+    ];
 
     /* ── Logic Isolation ───────────────────────────────────────── */
-    function calcRow(denom, rowState) {
+    function calcRow(denom, rowState, isFloat) {
       const s = rowState || {};
       const raw = field => (s[field] !== '' && s[field] != null) ? parseInt(s[field], 10) : null;
+      
+      const stock = raw('stock');
 
-      const stock     = raw('stock');
+      if (isFloat) {
+        if (stock === null) return null;
+        return { st: stock, isError: false, value: stock * denom };
+      }
+
       const activated = raw('activated');
       const sold      = raw('sold');
 
@@ -339,44 +393,44 @@
       return { st, act, sl, closing, isError, value };
     }
 
-    function exportCSV(state, meta) {
+    function exportCSV(state, meta, activeTab) {
+      const isFloat = activeTab === 'float';
       const date    = meta.date    || 'N/A';
       const cashier = meta.cashier || 'N/A';
 
       const rows = [
-        ['Lottery Inventory Report'],
+        [isFloat ? 'Lottery Float Report' : 'Lottery Inventory Report'],
         ['Date', date],
         ['Cashier', cashier],
         [],
-        ['Price', "Today's Stock", 'Activated Today', 'Sold Today', 'Closing Inventory', 'Value'],
       ];
+      
+      if (isFloat) rows.push(['Price', 'Quantity (Stock)', 'Value']);
+      else rows.push(['Price', "Today's Stock", 'Activated Today', 'Sold Today', 'Closing Inventory', 'Value']);
 
       let grand = 0;
 
       DENOMS.forEach(d => {
         const s = state[d] || {};
-        const r = calcRow(d, s);
-        const closing = (r && !r.isError) ? r.closing : '';
-        const value   = (r && !r.isError) ? r.value   : '';
+        const r = calcRow(d, s, isFloat);
+        const value = (r && !r.isError) ? r.value : '';
         if (typeof value === 'number') grand += value;
 
-        rows.push([
-          `$${d}`,
-          s.stock     ?? '',
-          s.activated ?? '',
-          s.sold      ?? '',
-          closing,
-          value !== '' ? `$${value}` : '',
-        ]);
+        if (isFloat) {
+          rows.push([ `$${d}`, s.stock ?? '', value !== '' ? `$${value}` : '' ]);
+        } else {
+          const closing = (r && !r.isError) ? r.closing : '';
+          rows.push([ `$${d}`, s.stock ?? '', s.activated ?? '', s.sold ?? '', closing, value !== '' ? `$${value}` : '' ]);
+        }
       });
 
-      rows.push([], ['Grand Total', '', '', '', '', `$${grand.toLocaleString()}`]);
+      rows.push([], ['Grand Total', '', ...(isFloat ? [''] : ['', '', '', '']), `$${grand.toLocaleString()}`]);
 
       const csv  = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
       const url  = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
       const link = Object.assign(document.createElement('a'), {
         href:     url,
-        download: `lottery-${date.replace(/\s+/g, '-')}.csv`,
+        download: `${isFloat ? 'float' : 'shift'}-${date.replace(/\s+/g, '-')}.csv`,
       });
       document.body.appendChild(link);
       link.click();
@@ -422,27 +476,26 @@
     }
 
     /* ── Components: Inventory Row ─────────────────────────────── */
-    function InventoryRow({ denom, rowState, onCellInput }) {
-      const calc = calcRow(denom, rowState);
+    function InventoryRow({ denom, rowState, activeField, isActiveRow, isFloat, fields, onCellTap }) {
+      const calc = calcRow(denom, rowState, isFloat);
 
       const renderCell = (fieldDef) => {
         const val = rowState?.[fieldDef.key];
         const isError = fieldDef.key === 'sold' && calc?.isError;
+        const isActive = isActiveRow && activeField === fieldDef.key;
 
         let className = 'cell-input';
         if (val !== '' && val != null) className += ' filled';
         if (isError) className += ' is-error';
+        if (isActive) className += ' is-active';
 
         return html`
-          <td>
-            <input 
-              type="number"
+          <td onClick=${() => onCellTap(denom, fieldDef.key)}>
+            <div 
               class=${className} 
-              min="0"
-              aria-label=${`${fieldDef.label} for $${denom}`}
-              value=${val !== undefined ? val : ''}
-              onInput=${(e) => onCellInput(denom, fieldDef.key, e.target.value)}
-            />
+              aria-label=${`${fieldDef.label} for $${denom}`}>
+              ${val !== undefined && val !== '' ? val : '—'}
+            </div>
           </td>
         `;
       };
@@ -456,7 +509,7 @@
           closingStr = 'ERR'; 
           closingClass += ' is-err';
         } else {
-          closingStr = calc.closing.toLocaleString();
+          closingStr = isFloat ? '' : calc.closing.toLocaleString();
           closingClass += ' has-val';
           valueStr = '$' + calc.value.toLocaleString();
           if (calc.value > 0) valueClass += ' has-val';
@@ -466,35 +519,56 @@
       return html`
         <tr>
           <td class="cell-price">$${denom}</td>
-          ${FIELDS.map(renderCell)}
-          <td class=${closingClass}>${closingStr}</td>
+          ${fields.map(renderCell)}
+          ${!isFloat && html`<td class=${closingClass}>${closingStr}</td>`}
           <td class=${valueClass}>${valueStr}</td>
         </tr>
       `;
     }
 
+    /* ── Components: Virtual Keypad ──────────────────────────────── */
+    function VirtualKeypad({ onKeyPress, onNext }) {
+      const keys = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+        ['clr', 0, 'del']
+      ];
+      return html`
+        <div class="keypad-container">
+          <div class="keypad-grid">
+            ${keys.flatMap(row => row.map(k => {
+              if (k === 'clr') return html`<div class="key-btn key-action" onClick=${() => onKeyPress('clr')}>CLR</div>`;
+              if (k === 'del') return html`<div class="key-btn key-action" onClick=${() => onKeyPress('del')}>DEL</div>`;
+              return html`<div class="key-btn" onClick=${() => onKeyPress(k)}>${k}</div>`;
+            }))}
+            <div style="grid-column: span 3">
+              <div class="key-btn key-next" onClick=${onNext}>Next</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     /* ── Components: Inventory Card (Mobile Layout) ───────────────── */
-    function InventoryCard({ denom, rowState, onCellInput }) {
-      const calc = calcRow(denom, rowState);
+    function InventoryCard({ denom, rowState, activeField, isFloat, fields, onCellTap }) {
+      const calc = calcRow(denom, rowState, isFloat);
 
       const renderInput = (fieldDef) => {
         const val = rowState?.[fieldDef.key];
         const isError = fieldDef.key === 'sold' && calc?.isError;
+        const isActive = activeField === fieldDef.key;
 
         let className = 'card-input';
         if (isError) className += ' is-error';
+        if (isActive) className += ' is-active';
 
         return html`
-          <div class="card-field">
+          <div class="card-field" onClick=${() => onCellTap(denom, fieldDef.key)}>
             <label class="card-label">${fieldDef.label}</label>
-            <input 
-              type="number" inputmode="numeric"
-              class=${className} 
-              min="0"
-              aria-label=${`${fieldDef.label} for $${denom}`}
-              value=${val !== undefined ? val : ''}
-              onInput=${(e) => onCellInput(denom, fieldDef.key, e.target.value)}
-            />
+            <div class=${className} aria-label=${`${fieldDef.label} for $${denom}`}>
+              ${val !== undefined && val !== '' ? val : '—'}
+            </div>
           </div>
         `;
       };
@@ -508,8 +582,8 @@
           closingStr = 'ERR'; 
           closingClass += ' is-error';
         } else {
-          closingStr = calc.closing.toLocaleString();
-          if (calc.closing > 0) closingClass += ' is-positive';
+          closingStr = isFloat ? '' : calc.closing.toLocaleString();
+          if (!isFloat && calc.closing > 0) closingClass += ' is-positive';
           
           valueStr = '$' + calc.value.toLocaleString();
           if (calc.value > 0) valueClass += ' is-positive';
@@ -521,24 +595,24 @@
           <div class="card-header">
             <span class="card-price">$${denom}</span>
             <div class="card-results">
-              <span class=${closingClass} title="Closing Inventory">Close: ${closingStr}</span>
+              ${!isFloat ? html`<span class=${closingClass} title="Closing Inventory">Close: ${closingStr}</span>` : null}
               <span class=${valueClass} title="Total Value">Value: ${valueStr}</span>
             </div>
           </div>
           <div class="card-grid">
-            ${FIELDS.map(renderInput)}
+            ${fields.map(renderInput)}
           </div>
         </article>
       `;
     }
 
     /* ── Components: Summary Cards & Actions ────────────────────── */
-    function SummaryCard({ totalValue, onPrint, onExport, onClear }) {
+    function SummaryCard({ totalValue, activeTab, onPrint, onExport, onClear }) {
       return html`
         <section class="summary">
           <div class="summary-grid">
             <div class="stat-card">
-              <div class="stat-label">Total shift value</div>
+              <div class="stat-label">Total ${activeTab === 'float' ? 'float' : 'shift'} value</div>
               <div class="stat-value c-green">$${totalValue.toLocaleString()}</div>
             </div>
           </div>
@@ -553,9 +627,14 @@
 
     /* ── Main Application ──────────────────────────────────────── */
     function App() {
-      // Bootstrap state from localStorage
+      const [activeTab, setActiveTab] = useState(() => localStorage.getItem(LS_TAB) || 'shift');
+
+      // Bootstrap states
       const [state, setState] = useState(() => {
         try { return JSON.parse(localStorage.getItem(LS_STATE)) || {}; } catch { return {}; }
+      });
+      const [floatState, setFloatState] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(LS_FLOAT_STATE)) || {}; } catch { return {}; }
       });
       const [meta, setMeta] = useState(() => {
         try { return JSON.parse(localStorage.getItem(LS_META)) || {}; } catch { return {}; }
@@ -563,43 +642,92 @@
       const [viewMode, setViewMode] = useState(() => {
         return localStorage.getItem('lotto_v2_viewMode') || 'cards';
       });
+      const [activeDenomIdx, setActiveDenomIdx] = useState(0);
+      const [activeField, setActiveField] = useState('stock');
 
-      // Side-effects: Persist whenever state/meta changes
+      // Sync active state/target based on mode
+      const isFloat = activeTab === 'float';
+      const currentState = isFloat ? floatState : state;
+      const setCurrentState = isFloat ? setFloatState : setState;
+      const currentFields = isFloat ? FLOAT_FIELDS : SHIFT_FIELDS;
+
+      // Side-effects
       useEffect(() => { localStorage.setItem(LS_STATE, JSON.stringify(state)); }, [state]);
+      useEffect(() => { localStorage.setItem(LS_FLOAT_STATE, JSON.stringify(floatState)); }, [floatState]);
       useEffect(() => { localStorage.setItem(LS_META, JSON.stringify(meta)); }, [meta]);
-      useEffect(() => { localStorage.setItem('lotto_v2_viewMode', viewMode); }, [viewMode]);
+      useEffect(() => { localStorage.setItem(LS_TAB, activeTab); }, [activeTab]);
+      useEffect(() => { 
+        localStorage.setItem('lotto_v2_viewMode', viewMode); 
+        document.body.className = viewMode === 'cards' ? 'mode-cards' : '';
+      }, [viewMode]);
 
-      const onCellInput = useCallback((denom, field, value) => {
-        setState(prev => {
+      // When tab changes, reset field if it doesn't belong to the new mode
+      useEffect(() => {
+        if (isFloat && activeField !== 'stock') setActiveField('stock');
+      }, [activeTab]);
+
+      const onKeypadPress = (key) => {
+        const denom = DENOMS[activeDenomIdx];
+        setCurrentState(prev => {
           const row = prev[denom] || { stock: '', activated: '', sold: '' };
-          return { ...prev, [denom]: { ...row, [field]: value } };
+          let currentVal = row[activeField] || '';
+          if (key === 'del')      currentVal = currentVal.toString().slice(0, -1);
+          else if (key === 'clr') currentVal = '';
+          else                    currentVal = currentVal.toString() + key.toString();
+          return { ...prev, [denom]: { ...row, [activeField]: currentVal } };
         });
-      }, []);
+      };
+
+      const onKeypadNext = () => {
+        if (isFloat) {
+          // Float only has 'stock', skip directly to next denom
+          if (activeDenomIdx < DENOMS.length - 1) setActiveDenomIdx(activeDenomIdx + 1);
+          else setActiveDenomIdx(0);
+        } else {
+          if (activeField === 'stock') setActiveField('activated');
+          else if (activeField === 'activated') setActiveField('sold');
+          else if (activeField === 'sold') {
+            if (activeDenomIdx < DENOMS.length - 1) { setActiveDenomIdx(activeDenomIdx + 1); setActiveField('stock'); }
+            else { setActiveField('stock'); setActiveDenomIdx(0); }
+          }
+        }
+      };
+
+      const handleCellTap = (denom, field) => {
+        const idx = DENOMS.indexOf(denom);
+        if (idx !== -1) setActiveDenomIdx(idx);
+        setActiveField(field);
+      };
 
       // Computation: totalValue
       const totalValue = useMemo(() => {
         let sum = 0;
         DENOMS.forEach(d => {
-          const r = calcRow(d, state[d]);
-          if (r && !r.isError) {
+          const r = calcRow(d, currentState[d], isFloat);
+          if (r && !r.isError && r.value != null && !isNaN(r.value)) {
             sum += r.value;
           }
         });
         return sum;
-      }, [state]);
+      }, [currentState, isFloat]);
 
       // Handlers
       const handleClear = () => {
-        if (!confirm('Clear all entries for this shift? This cannot be undone.')) return;
-        setState({});
+        if (!confirm(`Clear all ${isFloat ? 'float sheet' : 'shift counter'} entries? This cannot be undone.`)) return;
+        setCurrentState({});
       };
       const handlePrint = () => window.print();
-      const handleExport = () => exportCSV(state, meta);
+      const handleExport = () => exportCSV(currentState, meta, activeTab);
 
       return html`
         <${Header} meta=${meta} setMeta=${setMeta} />
         
-        <main class="container">
+        <div class="app-tabs">
+          <button class=${`tab-btn ${activeTab === 'shift' ? 'active' : ''}`} onClick=${() => setActiveTab('shift')}>Shift Calculator</button>
+          <button class=${`tab-btn ${activeTab === 'float' ? 'active' : ''}`} onClick=${() => setActiveTab('float')}>Count Float Sheet</button>
+        </div>
+        
+        <main class="container" style="padding-top: 0;">
           <div style="display: flex; justify-content: center;">
             <div class="view-toggle" aria-label="Toggle Layout View">
               <button class=${`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick=${() => setViewMode('table')}>Table View</button>
@@ -607,7 +735,12 @@
             </div>
           </div>
 
-          <div class="section-label">Ticket Denominations</div>
+          ${viewMode === 'cards' ? html`
+            <div style="text-align: center; margin-bottom: 12px; flex-shrink: 0;">
+              <div style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Total ${isFloat ? 'Float' : 'Shift'} Value</div>
+              <div style="font-family: var(--font-mono); font-size: 24px; color: var(--green); font-weight: 600;">$${totalValue.toLocaleString()}</div>
+            </div>
+          ` : html`<div class="section-label">Ticket Denominations</div>`}
           
           ${viewMode === 'table' ? html`
             <div class="table-wrapper">
@@ -615,44 +748,61 @@
                 <thead>
                   <tr>
                     <th class="col-price" scope="col">Price</th>
-                    <th scope="col">Stock</th>
-                    <th scope="col">Activated</th>
-                    <th scope="col">Sold</th>
-                    <th scope="col">Closing</th>
+                    ${currentFields.map(f => html`<th scope="col">${f.label}</th>`)}
+                    ${!isFloat ? html`<th scope="col">Closing</th>` : null}
                     <th scope="col">Value</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${DENOMS.map(d => html`
+                  ${DENOMS.map((d, idx) => html`
                     <${InventoryRow} 
                       key=${d}
                       denom=${d} 
-                      rowState=${state[d]} 
-                      onCellInput=${onCellInput}
+                      rowState=${currentState[d]} 
+                      activeField=${activeField}
+                      isActiveRow=${activeDenomIdx === idx}
+                      isFloat=${isFloat}
+                      fields=${currentFields}
+                      onCellTap=${handleCellTap}
                     />
                   `)}
                 </tbody>
               </table>
             </div>
+            
+            <div style="margin-top: 24px;">
+              <${VirtualKeypad} onKeyPress=${onKeypadPress} onNext=${onKeypadNext} />
+            </div>
           ` : html`
-            <div class="inv-cards">
-              ${DENOMS.map(d => html`
+            <div class="carousel-container">
+              <div class="carousel-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: var(--font-mono); color: var(--hint); font-size: 13px;">
+                  <button class="btn btn-ghost" style="padding: 6px 16px;" disabled=${activeDenomIdx === 0} onClick=${() => setActiveDenomIdx(Math.max(0, activeDenomIdx - 1))}>← Prev</button>
+                  <span style="background: var(--surface); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">Card ${activeDenomIdx + 1} of ${DENOMS.length}</span>
+                  <button class="btn btn-ghost" style="padding: 6px 16px;" disabled=${activeDenomIdx === DENOMS.length - 1} onClick=${() => setActiveDenomIdx(Math.min(DENOMS.length - 1, activeDenomIdx + 1))}>Next →</button>
+                </div>
                 <${InventoryCard} 
-                  key=${d}
-                  denom=${d} 
-                  rowState=${state[d]} 
-                  onCellInput=${onCellInput}
+                  denom=${DENOMS[activeDenomIdx]} 
+                  rowState=${currentState[DENOMS[activeDenomIdx]]} 
+                  activeField=${activeField}
+                  isFloat=${isFloat}
+                  fields=${currentFields}
+                  onCellTap=${handleCellTap}
                 />
-              `)}
+              </div>
+              <${VirtualKeypad} onKeyPress=${onKeypadPress} onNext=${onKeypadNext} />
             </div>
           `}
 
-          <${SummaryCard} 
-            totalValue=${totalValue}
-            onPrint=${handlePrint}
-            onExport=${handleExport}
-            onClear=${handleClear}
-          />
+          ${viewMode === 'table' && html`
+            <${SummaryCard} 
+              totalValue=${totalValue}
+              activeTab=${activeTab}
+              onPrint=${handlePrint}
+              onExport=${handleExport}
+              onClear=${handleClear}
+            />
+          `}
         </main>
       `;
     }
