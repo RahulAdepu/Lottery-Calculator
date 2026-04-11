@@ -277,6 +277,9 @@
     ============================================================ */
     .carousel-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
     .carousel-view { flex: 1; display: flex; flex-direction: column; padding-bottom: 12px; }
+    .carousel-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: var(--font-mono); color: var(--hint); font-size: 13px; }
+    .carousel-nav .btn { padding: 6px 16px; }
+    .carousel-nav-text { background: var(--surface); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
     
     .keypad-container {
       background: var(--card); border-top: 1px solid var(--border);
@@ -329,11 +332,43 @@
     @media (max-width: 500px) {
       body.mode-cards { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
       body.mode-cards .container { flex: 1; display: flex; flex-direction: column; padding-bottom: 0px; }
-      body.mode-cards .carousel-container { flex: 1; justify-content: flex-start; }
+      body.mode-cards .carousel-container { flex: 1; justify-content: flex-start; min-height: 0; }
       .topbar-meta { display: none; }
       .summary-grid { max-width: 100%; margin-left: 0; }
       .actions { justify-content: flex-start; }
       .stat-card { text-align: left; }
+      
+      /* UI Compression for Small Mobile Screens */
+      .app-tabs { margin: 8px auto 8px; padding: 0 8px; }
+      .tab-btn { padding: 6px; font-size: 11px; }
+      .topbar { padding: 8px 16px; }
+      .brand-title { font-size: 18px; }
+      .view-toggle { margin-bottom: 8px; }
+      .toggle-btn { padding: 6px 12px; font-size: 12px; }
+      .mobile-total { margin-bottom: 4px !important; }
+      
+      /* Compressed Carousel Nav */
+      .carousel-nav { margin-bottom: 8px; font-size: 11px; }
+      .carousel-nav .btn { padding: 4px 8px; }
+      .carousel-nav-text { padding: 4px 8px; }
+      
+      /* Compressed Card Layout */
+      .denom-card { padding: 12px; margin-bottom: 0; }
+      .card-header { padding-bottom: 8px; margin-bottom: 8px; }
+      .card-price { font-size: 18px; }
+      .card-results { gap: 4px; }
+      .card-result-pill { padding: 4px 6px; font-size: 10px; }
+      .card-grid { gap: 6px; }
+      .card-field { display: flex; align-items: center; justify-content: space-between; }
+      .card-label { margin-bottom: 0; font-size: 12px; }
+      .card-input { width: 50%; padding: 6px 12px; font-size: 14px; min-height: 38px; display: flex; align-items: center; justify-content: flex-end; }
+      
+      /* Compressed Keypad */
+      .keypad-container { padding: 8px 12px 12px; margin: auto -16px -12px; }
+      .keypad-grid { gap: 6px; }
+      .key-btn { height: 42px; font-size: 20px; }
+      .key-btn.key-action { font-size: 14px; }
+      .key-btn.key-next { font-size: 14px; }
     }
   </style>
 </head>
@@ -736,9 +771,9 @@
           </div>
 
           ${viewMode === 'cards' ? html`
-            <div style="text-align: center; margin-bottom: 12px; flex-shrink: 0;">
+            <div class="mobile-total" style="text-align: center; margin-bottom: 12px; flex-shrink: 0;">
               <div style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Total ${isFloat ? 'Float' : 'Shift'} Value</div>
-              <div style="font-family: var(--font-mono); font-size: 24px; color: var(--green); font-weight: 600;">$${totalValue.toLocaleString()}</div>
+              <div style="font-family: var(--font-mono); font-size: 24px; color: var(--green); font-weight: 600; line-height: 1;">$${totalValue.toLocaleString()}</div>
             </div>
           ` : html`<div class="section-label">Ticket Denominations</div>`}
           
@@ -776,10 +811,10 @@
           ` : html`
             <div class="carousel-container">
               <div class="carousel-view">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: var(--font-mono); color: var(--hint); font-size: 13px;">
-                  <button class="btn btn-ghost" style="padding: 6px 16px;" disabled=${activeDenomIdx === 0} onClick=${() => setActiveDenomIdx(Math.max(0, activeDenomIdx - 1))}>← Prev</button>
-                  <span style="background: var(--surface); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">Card ${activeDenomIdx + 1} of ${DENOMS.length}</span>
-                  <button class="btn btn-ghost" style="padding: 6px 16px;" disabled=${activeDenomIdx === DENOMS.length - 1} onClick=${() => setActiveDenomIdx(Math.min(DENOMS.length - 1, activeDenomIdx + 1))}>Next →</button>
+                <div class="carousel-nav">
+                  <button class="btn btn-ghost" disabled=${activeDenomIdx === 0} onClick=${() => setActiveDenomIdx(Math.max(0, activeDenomIdx - 1))}>← Prev</button>
+                  <span class="carousel-nav-text">Card ${activeDenomIdx + 1} of ${DENOMS.length}</span>
+                  <button class="btn btn-ghost" disabled=${activeDenomIdx === DENOMS.length - 1} onClick=${() => setActiveDenomIdx(Math.min(DENOMS.length - 1, activeDenomIdx + 1))}>Next →</button>
                 </div>
                 <${InventoryCard} 
                   denom=${DENOMS[activeDenomIdx]} 
