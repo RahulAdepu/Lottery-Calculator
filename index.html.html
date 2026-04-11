@@ -208,6 +208,75 @@
     .btn-danger:hover { background: rgba(255,107,107,.18); }
 
     /* ============================================================
+       CARD LAYOUT (MOBILE OPTIMIZED)
+    ============================================================ */
+    .inv-cards {
+      display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;
+    }
+    .denom-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .card-price {
+      font-family: var(--font-mono); font-size: 20px; font-weight: 600; color: var(--green);
+    }
+    .card-results { display: flex; gap: 12px; }
+    .card-result-pill {
+      font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+      padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+      background: var(--surface); color: var(--text);
+    }
+    .card-result-pill.is-error {
+      border-color: var(--red); color: var(--red); background: var(--red-bg);
+    }
+    .card-result-pill.is-positive {
+      border-color: var(--green); color: var(--green); background: var(--green-bg);
+    }
+    
+    .card-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .card-field { display: flex; flex-direction: column; gap: 6px; }
+    .card-label {
+      font-size: 11px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: .5px;
+      text-align: center;
+    }
+    .card-input {
+      font-family: var(--font-mono); font-size: 16px; color: var(--text);
+      text-align: center; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 14px 8px; outline: none; transition: border-color .15s;
+      width: 100%; display: block; -moz-appearance: textfield;
+    }
+    .card-input::-webkit-outer-spin-button,
+    .card-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .card-input:focus { border-color: var(--green); }
+    .card-input.is-error { border-color: var(--red); color: var(--red); }
+
+    /* ============================================================
+       TOGGLE SWITCH
+    ============================================================ */
+    .view-toggle {
+      display: flex; background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 6px; gap: 6px; margin-bottom: 24px;
+      width: 100%; max-width: 400px;
+    }
+    .toggle-btn {
+      flex: 1; background: transparent; border: 1px solid transparent; color: var(--muted);
+      padding: 12px 16px; font-size: 15px; font-weight: 600; font-family: var(--font-ui);
+      border-radius: 8px; cursor: pointer; transition: all .2s;
+    }
+    .toggle-btn.active {
+      background: var(--surface); color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      border: 1px solid var(--border-md);
+    }
+
+    /* ============================================================
        PRINT & RESPONSIVE
     ============================================================ */
     @media print {
@@ -404,6 +473,65 @@
       `;
     }
 
+    /* ── Components: Inventory Card (Mobile Layout) ───────────────── */
+    function InventoryCard({ denom, rowState, onCellInput }) {
+      const calc = calcRow(denom, rowState);
+
+      const renderInput = (fieldDef) => {
+        const val = rowState?.[fieldDef.key];
+        const isError = fieldDef.key === 'sold' && calc?.isError;
+
+        let className = 'card-input';
+        if (isError) className += ' is-error';
+
+        return html`
+          <div class="card-field">
+            <label class="card-label">${fieldDef.label}</label>
+            <input 
+              type="number" inputmode="numeric"
+              class=${className} 
+              min="0"
+              aria-label=${`${fieldDef.label} for $${denom}`}
+              value=${val !== undefined ? val : ''}
+              onInput=${(e) => onCellInput(denom, fieldDef.key, e.target.value)}
+            />
+          </div>
+        `;
+      };
+
+      let closingStr = '—', valueStr = '—';
+      let closingClass = 'card-result-pill';
+      let valueClass = 'card-result-pill';
+
+      if (calc) {
+        if (calc.isError) {
+          closingStr = 'ERR'; 
+          closingClass += ' is-error';
+        } else {
+          closingStr = calc.closing.toLocaleString();
+          if (calc.closing > 0) closingClass += ' is-positive';
+          
+          valueStr = '$' + calc.value.toLocaleString();
+          if (calc.value > 0) valueClass += ' is-positive';
+        }
+      }
+
+      return html`
+        <article class="denom-card">
+          <div class="card-header">
+            <span class="card-price">$${denom}</span>
+            <div class="card-results">
+              <span class=${closingClass} title="Closing Inventory">Close: ${closingStr}</span>
+              <span class=${valueClass} title="Total Value">Value: ${valueStr}</span>
+            </div>
+          </div>
+          <div class="card-grid">
+            ${FIELDS.map(renderInput)}
+          </div>
+        </article>
+      `;
+    }
+
     /* ── Components: Summary Cards & Actions ────────────────────── */
     function SummaryCard({ totalValue, onPrint, onExport, onClear }) {
       return html`
@@ -432,10 +560,14 @@
       const [meta, setMeta] = useState(() => {
         try { return JSON.parse(localStorage.getItem(LS_META)) || {}; } catch { return {}; }
       });
+      const [viewMode, setViewMode] = useState(() => {
+        return localStorage.getItem('lotto_v2_viewMode') || 'cards';
+      });
 
       // Side-effects: Persist whenever state/meta changes
       useEffect(() => { localStorage.setItem(LS_STATE, JSON.stringify(state)); }, [state]);
       useEffect(() => { localStorage.setItem(LS_META, JSON.stringify(meta)); }, [meta]);
+      useEffect(() => { localStorage.setItem('lotto_v2_viewMode', viewMode); }, [viewMode]);
 
       const onCellInput = useCallback((denom, field, value) => {
         setState(prev => {
@@ -468,32 +600,52 @@
         <${Header} meta=${meta} setMeta=${setMeta} />
         
         <main class="container">
+          <div style="display: flex; justify-content: center;">
+            <div class="view-toggle" aria-label="Toggle Layout View">
+              <button class=${`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick=${() => setViewMode('table')}>Table View</button>
+              <button class=${`toggle-btn ${viewMode === 'cards' ? 'active' : ''}`} onClick=${() => setViewMode('cards')}>Card View</button>
+            </div>
+          </div>
+
           <div class="section-label">Ticket Denominations</div>
           
-          <div class="table-wrapper">
-            <table class="inv-table" role="grid" aria-label="Lottery inventory input">
-              <thead>
-                <tr>
-                  <th class="col-price" scope="col">Price</th>
-                  <th scope="col">Stock</th>
-                  <th scope="col">Activated</th>
-                  <th scope="col">Sold</th>
-                  <th scope="col">Closing</th>
-                  <th scope="col">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${DENOMS.map(d => html`
-                  <${InventoryRow} 
-                    key=${d}
-                    denom=${d} 
-                    rowState=${state[d]} 
-                    onCellInput=${onCellInput}
-                  />
-                `)}
-              </tbody>
-            </table>
-          </div>
+          ${viewMode === 'table' ? html`
+            <div class="table-wrapper">
+              <table class="inv-table" role="grid" aria-label="Lottery inventory input">
+                <thead>
+                  <tr>
+                    <th class="col-price" scope="col">Price</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Activated</th>
+                    <th scope="col">Sold</th>
+                    <th scope="col">Closing</th>
+                    <th scope="col">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${DENOMS.map(d => html`
+                    <${InventoryRow} 
+                      key=${d}
+                      denom=${d} 
+                      rowState=${state[d]} 
+                      onCellInput=${onCellInput}
+                    />
+                  `)}
+                </tbody>
+              </table>
+            </div>
+          ` : html`
+            <div class="inv-cards">
+              ${DENOMS.map(d => html`
+                <${InventoryCard} 
+                  key=${d}
+                  denom=${d} 
+                  rowState=${state[d]} 
+                  onCellInput=${onCellInput}
+                />
+              `)}
+            </div>
+          `}
 
           <${SummaryCard} 
             totalValue=${totalValue}
