@@ -1,50 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Lottery Inventory — Shift Calculator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
   <style>
     /* ============================================================
        RESET & DESIGN TOKENS
     ============================================================ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --bg:          #0d1117;
-      --surface:     #161b25;
-      --card:        #1c2233;
-      --border:      rgba(255,255,255,.07);
-      --border-md:   rgba(255,255,255,.15);
-      --text:        #e8ecf4;
-      --muted:       #6e7894;
-      --hint:        #3c4260;
+      --bg: #0d1117;
+      --surface: #161b25;
+      --card: #1c2233;
+      --border: rgba(255, 255, 255, .07);
+      --border-md: rgba(255, 255, 255, .15);
+      --text: #e8ecf4;
+      --muted: #6e7894;
+      --hint: #3c4260;
 
-      --green:       #3ecf8e;
-      --green-bg:    rgba(62,207,142,.10);
-      --green-glow:  rgba(62,207,142,.22);
+      --green: #3ecf8e;
+      --green-bg: rgba(62, 207, 142, .10);
+      --green-glow: rgba(62, 207, 142, .22);
 
-      --red:         #ff6b6b;
-      --red-bg:      rgba(255,107,107,.10);
+      --red: #ff6b6b;
+      --red-bg: rgba(255, 107, 107, .10);
 
-      --amber:       #f5a623;
-      --blue:        #5b8dee;
+      --amber: #f5a623;
+      --blue: #5b8dee;
 
-      --radius-sm:   8px;
-      --radius-md:  12px;
-      --radius-lg:  18px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
 
-      --font-ui:   'Sora', sans-serif;
+      --font-ui: 'Sora', sans-serif;
       --font-mono: 'DM Mono', monospace;
     }
 
     /* ============================================================
        BASE
     ============================================================ */
-    html, body { height: 100%; }
+    html,
+    body {
+      height: 100%;
+    }
+
     body {
       font-family: var(--font-ui);
       background: var(--bg);
@@ -58,59 +70,128 @@
        APP TABS (Sub-header navigation)
     ============================================================ */
     .app-tabs {
-      display: flex; gap: 8px; padding: 0 16px; margin: 12px auto 20px;
+      display: flex;
+      gap: 8px;
+      padding: 0 16px;
+      margin: 12px auto 20px;
       max-width: 860px;
     }
+
     .tab-btn {
-      flex: 1; padding: 10px; font-family: var(--font-ui); font-size: 13px; font-weight: 600;
-      color: var(--muted); background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); cursor: pointer; transition: all .2s;
+      flex: 1;
+      padding: 10px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .2s;
       text-align: center;
     }
+
     .tab-btn.active {
-      background: var(--green-bg); color: var(--green); border-color: rgba(62,207,142,.3);
+      background: var(--green-bg);
+      color: var(--green);
+      border-color: rgba(62, 207, 142, .3);
     }
 
     /* ============================================================
        TOPBAR
     ============================================================ */
     .topbar {
-      position: sticky; top: 0; z-index: 40;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       padding: 12px 20px;
-      background: rgba(13,17,23,.92);
+      background: rgba(13, 17, 23, .92);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
     }
 
-    .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .brand-icon {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: var(--green); display: grid; place-items: center; flex-shrink: 0;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
-    .brand-icon svg { width: 19px; height: 19px; }
-    .brand-name { font-size: 14px; font-weight: 600; line-height: 1.2; }
-    .brand-sub  { font-size: 11px; color: var(--muted); font-weight: 400; }
 
-    .topbar-meta { display: flex; gap: 8px; align-items: center; }
-    .meta-field {
-      font-family: var(--font-ui); font-size: 12px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); color: var(--text);
-      padding: 7px 10px; outline: none; transition: border-color .15s;
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--green);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
     }
-    .meta-field::placeholder { color: var(--hint); }
-    .meta-field:focus { border-color: var(--green); }
+
+    .brand-icon svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .brand-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .topbar-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .meta-field {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .meta-field::placeholder {
+      color: var(--hint);
+    }
+
+    .meta-field:focus {
+      border-color: var(--green);
+    }
 
     /* ============================================================
        CONTAINER
     ============================================================ */
-    .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px 16px 280px 16px;
+    }
 
     .section-label {
-      font-size: 10px; font-weight: 600; letter-spacing: 1.4px;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
     }
 
     /* ============================================================
@@ -121,201 +202,526 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       margin-bottom: 24px;
-      
+
       /* Smooth scrollbar */
       scrollbar-width: thin;
       scrollbar-color: var(--border) transparent;
     }
-    .table-wrapper::-webkit-scrollbar { height: 6px; }
-    .table-wrapper::-webkit-scrollbar-track { background: transparent; }
-    .table-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
 
-    .inv-table { 
-      width: 100%; 
-      border-collapse: separate; 
-      border-spacing: 0 3px; 
-      min-width: 540px; /* guarantees layout won't squash on mobile */
+    .table-wrapper::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 6px;
+    }
+
+    .inv-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 3px;
+      table-layout: auto;
     }
 
     .inv-table thead th {
-      font-size: 10px; font-weight: 600; letter-spacing: .8px;
-      text-transform: uppercase; color: var(--hint);
-      padding: 0 6px 10px; text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--hint);
+      padding: 0 6px 10px;
+      text-align: center;
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
-    .inv-table thead th.col-price { text-align: left; padding-left: 2px; }
 
-    .inv-table tbody tr { transition: background .1s; }
-    .inv-table tbody tr:hover td { background: var(--surface); }
-    .inv-table tbody tr:hover td:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
-    .inv-table tbody tr:hover td:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .inv-table thead th.col-price {
+      text-align: left;
+      padding-left: 2px;
+    }
 
-    .inv-table tbody td { padding: 4px 4px; border-bottom: 1px solid var(--border); }
-    .inv-table tbody tr:last-child td { border-bottom: none; }
+    .inv-table tbody tr {
+      transition: background .1s;
+    }
+
+    .inv-table tbody tr:hover td {
+      background: var(--surface);
+    }
+
+    .inv-table tbody tr:hover td:first-child {
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    }
+
+    .inv-table tbody tr:hover td:last-child {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .inv-table tbody td {
+      padding: 4px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .inv-table tbody tr:last-child td {
+      border-bottom: none;
+    }
 
     /* price */
     .cell-price {
-      font-family: var(--font-mono); font-size: 16px; font-weight: 500;
-      padding-left: 6px !important; white-space: nowrap; width: 50px;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 500;
+      padding-left: 6px !important;
+      white-space: nowrap;
+      width: 50px;
     }
 
     /* text input */
     .cell-input {
-      font-family: var(--font-mono); font-size: 15px; color: var(--muted);
-      text-align: center; background: var(--card);
-      border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 12px 6px; outline: none; line-height: 20px;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 4px;
+      outline: none;
+      line-height: 20px;
       transition: border-color .15s, background .15s, color .15s;
-      width: 100%; min-width: 65px; cursor: pointer; user-select: none;
+      width: 100%;
+      min-width: 40px;
+      cursor: pointer;
+      user-select: none;
       display: block;
     }
-    .cell-input:hover  { border-color: var(--border-md); color: var(--text); }
-    .cell-input.is-active { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); color: var(--text); }
-    .cell-input.filled { color: var(--text); }
-    .cell-input.is-error  { border-color: var(--red);   background: var(--red-bg);   color: var(--red);   }
 
-    /* result cells */
-    .cell-result {
-      font-family: var(--font-mono); font-size: 14px; font-weight: 500;
-      text-align: center; color: var(--hint); padding: 10px 8px; white-space: nowrap;
+    .cell-input:hover {
+      border-color: var(--border-md);
+      color: var(--text);
     }
-    .cell-result.has-val { color: var(--text); }
-    .cell-result.is-err  { color: var(--red); }
+
+    .cell-input.is-active {
+      border-color: var(--green);
+      box-shadow: 0 0 0 1px var(--green);
+      color: var(--text);
+    }
+
+    .cell-input.filled {
+      color: var(--text);
+    }
+
+    .cell-input.is-error {
+      border-color: var(--red);
+      background: var(--red-bg);
+      color: var(--red);
+    }
+
+    .cell-result {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--hint);
+      padding: 10px 6px;
+      white-space: nowrap;
+    }
+
+    .cell-result.has-val {
+      color: var(--text);
+    }
+
+    .cell-result.is-err {
+      color: var(--red);
+    }
 
     /* value cell */
     .cell-value {
-      font-family: var(--font-mono); font-size: 14px; font-weight: 500;
-      text-align: center; color: var(--hint);
-      padding: 10px 10px; border-radius: var(--radius-sm); white-space: nowrap;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--hint);
+      padding: 10px 6px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
     }
-    .cell-value.has-val { background: var(--green-bg); color: var(--green); }
+
+    .cell-value.has-val {
+      background: var(--green-bg);
+      color: var(--green);
+    }
 
     /* ============================================================
        SUMMARY CARDS
     ============================================================ */
-    .summary { margin-top: 20px; }
-    .summary-grid { display: grid; grid-template-columns: 1fr; max-width: 180px; gap: 10px; margin-bottom: 18px; margin-left: auto; }
+    .summary {
+      margin-top: 20px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      max-width: 180px;
+      gap: 10px;
+      margin-bottom: 18px;
+      margin-left: auto;
+    }
 
     .stat-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 14px; text-align: right;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      text-align: right;
     }
-    .stat-label { font-size: 10px; line-height: 1.3; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;}
-    .stat-value { font-family: var(--font-mono); font-size: 20px; font-weight: 500; color: var(--text); }
-    .stat-value.c-green { color: var(--green); }
+
+    .stat-label {
+      font-size: 10px;
+      line-height: 1.3;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .stat-value.c-green {
+      color: var(--green);
+    }
 
     /* ============================================================
        BUTTONS
     ============================================================ */
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-    .btn {
-      font-family: var(--font-ui); font-size: 13px; font-weight: 500;
-      border-radius: var(--radius-sm); padding: 10px 18px;
-      cursor: pointer; border: none; outline: none; transition: filter .15s, background .15s;
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
-    .btn-primary { background: var(--green); color: #0d1117; }
-    .btn-primary:hover { filter: brightness(1.12); }
-    .btn-ghost  { background: var(--card); color: var(--text); border: 1px solid var(--border); }
-    .btn-ghost:hover  { border-color: var(--border-md); background: var(--surface); }
-    .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(255,107,107,.20); }
-    .btn-danger:hover { background: rgba(255,107,107,.18); }
+
+    .btn {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: filter .15s, background .15s;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #0d1117;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.12);
+    }
+
+    .btn-ghost {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border-md);
+      background: var(--surface);
+    }
+
+    .btn-danger {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(255, 107, 107, .20);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 107, 107, .18);
+    }
 
     /* ============================================================
        CARD LAYOUT (MOBILE OPTIMIZED)
     ============================================================ */
     .inv-cards {
-      display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
     }
+
     .denom-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-md); padding: 16px;
-      display: flex; flex-direction: column; gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
+
     .card-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
     }
+
     .card-price {
-      font-family: var(--font-mono); font-size: 20px; font-weight: 600; color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--green);
     }
-    .card-results { display: flex; gap: 12px; }
+
+    .card-results {
+      display: flex;
+      gap: 12px;
+    }
+
     .card-result-pill {
-      font-family: var(--font-mono); font-size: 13px; font-weight: 500;
-      padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-      background: var(--surface); color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
     }
+
     .card-result-pill.is-error {
-      border-color: var(--red); color: var(--red); background: var(--red-bg);
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-bg);
     }
+
     .card-result-pill.is-positive {
-      border-color: var(--green); color: var(--green); background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-bg);
     }
-    
+
     .card-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
-    .card-field { display: flex; flex-direction: column; gap: 6px; }
+
+    .card-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     .card-label {
-      font-size: 11px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: .5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--hint);
+      text-transform: uppercase;
+      letter-spacing: .5px;
       text-align: center;
     }
+
     .card-input {
-      font-family: var(--font-mono); font-size: 16px; color: var(--text);
-      text-align: center; background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 14px 8px; outline: none; transition: border-color .15s;
-      width: 100%; display: block; -moz-appearance: textfield;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 8px;
+      outline: none;
+      transition: border-color .15s, color .15s;
+      width: 100%;
+      display: block;
+      -moz-appearance: textfield;
     }
+
+    .card-input.filled {
+      color: var(--text);
+    }
+
     .card-input::-webkit-outer-spin-button,
-    .card-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .card-input:focus { border-color: var(--green); }
-    .card-input.is-error { border-color: var(--red); color: var(--red); }
+    .card-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .card-input:focus {
+      border-color: var(--green);
+    }
+
+    .card-input.is-error {
+      border-color: var(--red);
+      color: var(--red);
+    }
 
     /* ============================================================
        CAROUSEL & KEYPAD
     ============================================================ */
-    .carousel-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-    .carousel-view { flex: 1; display: flex; flex-direction: column; padding-bottom: 12px; }
-    .carousel-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: var(--font-mono); color: var(--hint); font-size: 13px; }
-    .carousel-nav .btn { padding: 6px 16px; }
-    .carousel-nav-text { background: var(--surface); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-    
+    .carousel-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .carousel-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 12px;
+    }
+
+    .carousel-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      color: var(--hint);
+      font-size: 13px;
+    }
+
+    .carousel-nav .btn {
+      padding: 6px 16px;
+    }
+
+    .carousel-nav-text {
+      background: var(--surface);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
     .keypad-container {
-      background: var(--card); border-top: 1px solid var(--border);
-      padding: 12px 16px 24px; margin: auto -16px -24px; box-shadow: 0 -4px 20px rgba(0,0,0,.4);
+      background: rgba(28, 34, 51, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px 24px;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, .5);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
     }
-    .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .key-btn {
-      background: var(--surface); border: 1px solid var(--border); color: var(--text);
-      font-family: var(--font-mono); font-size: 24px; font-weight: 500; border-radius: var(--radius-sm);
-      height: 54px; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background .1s; user-select: none; touch-action: manipulation;
-    }
-    .key-btn:active { background: var(--border-md); }
-    .key-btn.key-action { font-family: var(--font-ui); font-size: 16px; color: var(--muted); }
-    .key-btn.key-next { background: var(--green); color: #0d1117; font-weight: 600; border-color: transparent; }
     
-    .card-input { cursor: pointer; user-select: none; line-height: 20px; }
+    @media (min-width: 860px) {
+      .keypad-container {
+        left: 50%;
+        width: 100%;
+        max-width: 860px;
+        transform: translateX(-50%);
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-top-left-radius: var(--radius-md);
+        border-top-right-radius: var(--radius-md);
+      }
+    }
+
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .key-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .1s;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .key-btn:active {
+      background: var(--border-md);
+    }
+
+    .key-btn.key-action {
+      font-family: var(--font-ui);
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .key-btn.key-next {
+      background: var(--green);
+      color: #0d1117;
+      font-weight: 600;
+      border-color: transparent;
+    }
+
+    .card-input {
+      cursor: pointer;
+      user-select: none;
+      line-height: 20px;
+    }
+
     .card-input.is-active {
-      border-color: var(--green); box-shadow: 0 0 0 1px var(--green); color: var(--text);
+      border-color: var(--green);
+      box-shadow: 0 0 0 1px var(--green);
+      color: var(--text);
     }
 
     /* ============================================================
        TOGGLE SWITCH
     ============================================================ */
     .view-toggle {
-      display: flex; background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-md); padding: 6px; gap: 6px; margin-bottom: 24px;
-      width: 100%; max-width: 400px;
+      display: flex;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px;
+      gap: 6px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 400px;
     }
+
     .toggle-btn {
-      flex: 1; background: transparent; border: 1px solid transparent; color: var(--muted);
-      padding: 12px 16px; font-size: 15px; font-weight: 600; font-family: var(--font-ui);
-      border-radius: 8px; cursor: pointer; transition: all .2s;
+      flex: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .2s;
     }
+
     .toggle-btn.active {
-      background: var(--surface); color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
       border: 1px solid var(--border-md);
     }
 
@@ -323,55 +729,187 @@
        PRINT & RESPONSIVE
     ============================================================ */
     @media print {
-      .topbar, .actions, .view-toggle, .keypad-container { display: none !important; }
-      body { background: #fff; color: #000; padding: 0; }
-      .table-wrapper { overflow: visible; }
-      .inv-table { min-width: 100%; }
+
+      .topbar,
+      .app-tabs,
+      .actions,
+      .view-toggle,
+      .keypad-container {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+        color: #000;
+        padding: 0;
+      }
+
+      .table-wrapper {
+        overflow: visible;
+      }
+
+      .inv-table {
+        min-width: 100%;
+      }
     }
 
     @media (max-width: 500px) {
-      body.mode-cards { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
-      body.mode-cards .container { flex: 1; display: flex; flex-direction: column; padding-bottom: 0px; }
-      body.mode-cards .carousel-container { flex: 1; justify-content: flex-start; min-height: 0; }
-      .topbar-meta { display: none; }
-      .summary-grid { max-width: 100%; margin-left: 0; }
-      .actions { justify-content: flex-start; }
-      .stat-card { text-align: left; }
-      
+      .inv-table thead th {
+        font-size: 9px;
+        padding: 0 2px 6px;
+        letter-spacing: 0;
+      }
+      .cell-price {
+        font-size: 13px;
+        width: 30px;
+        padding-left: 4px !important;
+      }
+      .cell-input {
+        padding: 8px 2px;
+        font-size: 13px;
+      }
+      .cell-result, .cell-value {
+        padding: 8px 4px;
+        font-size: 12px;
+      }
+
+      .topbar-meta {
+        display: none;
+      }
+
+      .summary-grid {
+        max-width: 100%;
+        margin-left: 0;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .stat-card {
+        text-align: left;
+      }
+
       /* UI Compression for Small Mobile Screens */
-      .app-tabs { margin: 8px auto 8px; padding: 0 8px; }
-      .tab-btn { padding: 6px; font-size: 11px; }
-      .topbar { padding: 8px 16px; }
-      .brand-title { font-size: 18px; }
-      .view-toggle { margin-bottom: 8px; }
-      .toggle-btn { padding: 6px 12px; font-size: 12px; }
-      .mobile-total { margin-bottom: 4px !important; }
-      
+      .app-tabs {
+        margin: 8px auto 8px;
+        padding: 0 8px;
+      }
+
+      .tab-btn {
+        padding: 6px;
+        font-size: 11px;
+      }
+
+      .topbar {
+        padding: 8px 16px;
+      }
+
+      .brand-title {
+        font-size: 18px;
+      }
+
+      .view-toggle {
+        margin-bottom: 8px;
+      }
+
+      .toggle-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .mobile-total {
+        margin-bottom: 4px !important;
+      }
+
       /* Compressed Carousel Nav */
-      .carousel-nav { margin-bottom: 8px; font-size: 11px; }
-      .carousel-nav .btn { padding: 4px 8px; }
-      .carousel-nav-text { padding: 4px 8px; }
-      
+      .carousel-nav {
+        margin-bottom: 8px;
+        font-size: 11px;
+      }
+
+      .carousel-nav .btn {
+        padding: 4px 8px;
+      }
+
+      .carousel-nav-text {
+        padding: 4px 8px;
+      }
+
       /* Compressed Card Layout */
-      .denom-card { padding: 12px; margin-bottom: 0; }
-      .card-header { padding-bottom: 8px; margin-bottom: 8px; }
-      .card-price { font-size: 18px; }
-      .card-results { gap: 4px; }
-      .card-result-pill { padding: 4px 6px; font-size: 10px; }
-      .card-grid { gap: 6px; }
-      .card-field { display: flex; align-items: center; justify-content: space-between; }
-      .card-label { margin-bottom: 0; font-size: 12px; }
-      .card-input { width: 50%; padding: 6px 12px; font-size: 14px; min-height: 38px; display: flex; align-items: center; justify-content: flex-end; }
-      
+      .denom-card {
+        padding: 12px;
+        margin-bottom: 0;
+      }
+
+      .card-header {
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+      }
+
+      .card-price {
+        font-size: 18px;
+      }
+
+      .card-results {
+        gap: 4px;
+      }
+
+      .card-result-pill {
+        padding: 4px 6px;
+        font-size: 10px;
+      }
+
+      .card-grid {
+        gap: 6px;
+      }
+
+      .card-field {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .card-label {
+        margin-bottom: 0;
+        font-size: 12px;
+      }
+
+      .card-input {
+        width: 50%;
+        padding: 6px 12px;
+        font-size: 14px;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
       /* Compressed Keypad */
-      .keypad-container { padding: 8px 12px 12px; margin: auto -16px -12px; }
-      .keypad-grid { gap: 6px; }
-      .key-btn { height: 42px; font-size: 20px; }
-      .key-btn.key-action { font-size: 14px; }
-      .key-btn.key-next { font-size: 14px; }
+      .keypad-container {
+        padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+      }
+
+      .keypad-grid {
+        gap: 6px;
+      }
+
+      .key-btn {
+        height: 42px;
+        font-size: 20px;
+      }
+
+      .key-btn.key-action {
+        font-size: 14px;
+      }
+
+      .key-btn.key-next {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Preact mount target -->
@@ -385,87 +923,105 @@
     const html = htm.bind(h);
 
     /* ── Constants ─────────────────────────────────────────────── */
-    const DENOMS         = [2, 3, 4, 5, 10, 30, 50];
-    const LS_STATE       = 'lotto_v2_state';
+    const DENOMS = [2, 3, 4, 5, 10, 20, 30, 50];
+    const LS_STATE = 'lotto_v2_state';
     const LS_FLOAT_STATE = 'lotto_v2_float_state';
-    const LS_META        = 'lotto_v2_meta';
-    const LS_TAB         = 'lotto_v2_tab';
+    const LS_SALES_STATE = 'lotto_v2_sales_state';
+    const LS_META = 'lotto_v2_meta';
+    const LS_TAB = 'lotto_v2_tab';
 
     const SHIFT_FIELDS = [
-      { key: 'stock',     label: "Stock" },
+      { key: 'stock', label: "Stock" },
       { key: 'activated', label: 'Activated' },
-      { key: 'sold',      label: 'Sold' },
+      { key: 'sold', label: 'Sold' },
     ];
     const FLOAT_FIELDS = [
-      { key: 'stock',     label: "Stock" },
+      { key: 'stock', label: "Stock" },
+    ];
+    const SALES_FIELDS = [
+      { key: 'sold', label: 'Sold' },
     ];
 
     /* ── Logic Isolation ───────────────────────────────────────── */
-    function calcRow(denom, rowState, isFloat) {
+    function calcRow(denom, rowState, isFloat, isSales) {
       const s = rowState || {};
       const raw = field => (s[field] !== '' && s[field] != null) ? parseInt(s[field], 10) : null;
-      
-      const stock = raw('stock');
 
       if (isFloat) {
+        const stock = raw('stock');
         if (stock === null) return null;
         return { st: stock, isError: false, value: stock * denom };
       }
+      
+      if (isSales) {
+        const sold = raw('sold');
+        if (sold === null) return null;
+        return { sl: sold, isError: false, value: sold * denom };
+      }
 
+      const stock = raw('stock');
       const activated = raw('activated');
-      const sold      = raw('sold');
+      const sold = raw('sold');
 
       if (stock === null && activated === null && sold === null) return null;
 
-      const st  = stock     ?? 0;
+      const st = stock ?? 0;
       const act = activated ?? 0;
-      const sl  = sold      ?? 0;
+      const sl = sold ?? 0;
 
       const closing = st + act - sl;
       const isError = closing < 0;
-      const value   = isError ? null : closing * denom;
+      const value = isError ? null : closing * denom;
 
       return { st, act, sl, closing, isError, value };
     }
 
     function exportCSV(state, meta, activeTab) {
       const isFloat = activeTab === 'float';
-      const date    = meta.date    || 'N/A';
+      const isSales = activeTab === 'sales';
+      const date = meta.date || 'N/A';
       const cashier = meta.cashier || 'N/A';
+      
+      let title = 'Lottery Inventory Report';
+      if (isFloat) title = 'Lottery Float Report';
+      if (isSales) title = 'Lottery Daily Sales Report';
 
       const rows = [
-        [isFloat ? 'Lottery Float Report' : 'Lottery Inventory Report'],
+        [title],
         ['Date', date],
         ['Cashier', cashier],
         [],
       ];
-      
+
       if (isFloat) rows.push(['Price', 'Quantity (Stock)', 'Value']);
+      else if (isSales) rows.push(['Price', 'Quantity (Sold)', 'Value']);
       else rows.push(['Price', "Today's Stock", 'Activated Today', 'Sold Today', 'Closing Inventory', 'Value']);
 
       let grand = 0;
 
       DENOMS.forEach(d => {
         const s = state[d] || {};
-        const r = calcRow(d, s, isFloat);
+        const r = calcRow(d, s, isFloat, isSales);
         const value = (r && !r.isError) ? r.value : '';
         if (typeof value === 'number') grand += value;
 
         if (isFloat) {
-          rows.push([ `$${d}`, s.stock ?? '', value !== '' ? `$${value}` : '' ]);
+          rows.push([`$${d}`, s.stock ?? '', value !== '' ? `$${value}` : '']);
+        } else if (isSales) {
+          rows.push([`$${d}`, s.sold ?? '', value !== '' ? `$${value}` : '']);
         } else {
           const closing = (r && !r.isError) ? r.closing : '';
-          rows.push([ `$${d}`, s.stock ?? '', s.activated ?? '', s.sold ?? '', closing, value !== '' ? `$${value}` : '' ]);
+          rows.push([`$${d}`, s.stock ?? '', s.activated ?? '', s.sold ?? '', closing, value !== '' ? `$${value}` : '']);
         }
       });
 
-      rows.push([], ['Grand Total', '', ...(isFloat ? [''] : ['', '', '', '']), `$${grand.toLocaleString()}`]);
+      rows.push([], ['Grand Total', '', ...(isFloat || isSales ? [''] : ['', '', '', '']), `$${grand.toLocaleString()}`]);
 
-      const csv  = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-      const url  = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
       const link = Object.assign(document.createElement('a'), {
-        href:     url,
-        download: `${isFloat ? 'float' : 'shift'}-${date.replace(/\s+/g, '-')}.csv`,
+        href: url,
+        download: `${activeTab}-${date.replace(/\s+/g, '-')}.csv`,
       });
       document.body.appendChild(link);
       link.click();
@@ -497,13 +1053,13 @@
               class="meta-field" type="text" placeholder="Date" 
               style="width:130px" autocomplete="off" aria-label="Shift date" 
               value=${meta.date || ''} 
-              onInput=${e => setMeta({...meta, date: e.target.value})} 
+              onInput=${e => setMeta({ ...meta, date: e.target.value })} 
             />
             <input 
               class="meta-field" type="text" placeholder="Cashier name" 
               style="width:120px" autocomplete="off" aria-label="Cashier name" 
               value=${meta.cashier || ''} 
-              onInput=${e => setMeta({...meta, cashier: e.target.value})} 
+              onInput=${e => setMeta({ ...meta, cashier: e.target.value })} 
             />
           </div>
         </header>
@@ -511,8 +1067,8 @@
     }
 
     /* ── Components: Inventory Row ─────────────────────────────── */
-    function InventoryRow({ denom, rowState, activeField, isActiveRow, isFloat, fields, onCellTap }) {
-      const calc = calcRow(denom, rowState, isFloat);
+    function InventoryRow({ denom, rowState, activeField, isActiveRow, isFloat, isSales, fields, onCellTap }) {
+      const calc = calcRow(denom, rowState, isFloat, isSales);
 
       const renderCell = (fieldDef) => {
         const val = rowState?.[fieldDef.key];
@@ -529,7 +1085,7 @@
             <div 
               class=${className} 
               aria-label=${`${fieldDef.label} for $${denom}`}>
-              ${val !== undefined && val !== '' ? val : '—'}
+              ${val !== undefined && val !== '' ? val : (isActive ? '\u00A0' : '0')}
             </div>
           </td>
         `;
@@ -541,10 +1097,10 @@
 
       if (calc) {
         if (calc.isError) {
-          closingStr = 'ERR'; 
+          closingStr = 'ERR';
           closingClass += ' is-err';
         } else {
-          closingStr = isFloat ? '' : calc.closing.toLocaleString();
+          closingStr = (isFloat || isSales) ? '' : calc.closing.toLocaleString();
           closingClass += ' has-val';
           valueStr = '$' + calc.value.toLocaleString();
           if (calc.value > 0) valueClass += ' has-val';
@@ -555,7 +1111,7 @@
         <tr>
           <td class="cell-price">$${denom}</td>
           ${fields.map(renderCell)}
-          ${!isFloat && html`<td class=${closingClass}>${closingStr}</td>`}
+          ${(!isFloat && !isSales) ? html`<td class=${closingClass}>${closingStr}</td>` : null}
           <td class=${valueClass}>${valueStr}</td>
         </tr>
       `;
@@ -573,10 +1129,10 @@
         <div class="keypad-container">
           <div class="keypad-grid">
             ${keys.flatMap(row => row.map(k => {
-              if (k === 'clr') return html`<div class="key-btn key-action" onClick=${() => onKeyPress('clr')}>CLR</div>`;
-              if (k === 'del') return html`<div class="key-btn key-action" onClick=${() => onKeyPress('del')}>DEL</div>`;
-              return html`<div class="key-btn" onClick=${() => onKeyPress(k)}>${k}</div>`;
-            }))}
+        if (k === 'clr') return html`<div class="key-btn key-action" onClick=${() => onKeyPress('clr')}>CLR</div>`;
+        if (k === 'del') return html`<div class="key-btn key-action" onClick=${() => onKeyPress('del')}>DEL</div>`;
+        return html`<div class="key-btn" onClick=${() => onKeyPress(k)}>${k}</div>`;
+      }))}
             <div style="grid-column: span 3">
               <div class="key-btn key-next" onClick=${onNext}>Next</div>
             </div>
@@ -586,8 +1142,8 @@
     }
 
     /* ── Components: Inventory Card (Mobile Layout) ───────────────── */
-    function InventoryCard({ denom, rowState, activeField, isFloat, fields, onCellTap }) {
-      const calc = calcRow(denom, rowState, isFloat);
+    function InventoryCard({ denom, rowState, activeField, isFloat, isSales, fields, onCellTap }) {
+      const calc = calcRow(denom, rowState, isFloat, isSales);
 
       const renderInput = (fieldDef) => {
         const val = rowState?.[fieldDef.key];
@@ -595,6 +1151,7 @@
         const isActive = activeField === fieldDef.key;
 
         let className = 'card-input';
+        if (val !== '' && val != null) className += ' filled';
         if (isError) className += ' is-error';
         if (isActive) className += ' is-active';
 
@@ -602,7 +1159,7 @@
           <div class="card-field" onClick=${() => onCellTap(denom, fieldDef.key)}>
             <label class="card-label">${fieldDef.label}</label>
             <div class=${className} aria-label=${`${fieldDef.label} for $${denom}`}>
-              ${val !== undefined && val !== '' ? val : '—'}
+              ${val !== undefined && val !== '' ? val : (isActive ? '\u00A0' : '0')}
             </div>
           </div>
         `;
@@ -614,12 +1171,12 @@
 
       if (calc) {
         if (calc.isError) {
-          closingStr = 'ERR'; 
+          closingStr = 'ERR';
           closingClass += ' is-error';
         } else {
-          closingStr = isFloat ? '' : calc.closing.toLocaleString();
-          if (!isFloat && calc.closing > 0) closingClass += ' is-positive';
-          
+          closingStr = (isFloat || isSales) ? '' : calc.closing.toLocaleString();
+          if (!isFloat && !isSales && calc.closing > 0) closingClass += ' is-positive';
+
           valueStr = '$' + calc.value.toLocaleString();
           if (calc.value > 0) valueClass += ' is-positive';
         }
@@ -630,7 +1187,7 @@
           <div class="card-header">
             <span class="card-price">$${denom}</span>
             <div class="card-results">
-              ${!isFloat ? html`<span class=${closingClass} title="Closing Inventory">Close: ${closingStr}</span>` : null}
+              ${(!isFloat && !isSales) ? html`<span class=${closingClass} title="Closing Inventory">Close: ${closingStr}</span>` : null}
               <span class=${valueClass} title="Total Value">Value: ${valueStr}</span>
             </div>
           </div>
@@ -638,25 +1195,6 @@
             ${fields.map(renderInput)}
           </div>
         </article>
-      `;
-    }
-
-    /* ── Components: Summary Cards & Actions ────────────────────── */
-    function SummaryCard({ totalValue, activeTab, onPrint, onExport, onClear }) {
-      return html`
-        <section class="summary">
-          <div class="summary-grid">
-            <div class="stat-card">
-              <div class="stat-label">Total ${activeTab === 'float' ? 'float' : 'shift'} value</div>
-              <div class="stat-value c-green">$${totalValue.toLocaleString()}</div>
-            </div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-ghost" onClick=${onExport}>Export CSV</button>
-            <button class="btn btn-ghost" onClick=${onPrint}>Print PDF</button>
-            <button class="btn btn-danger" onClick=${onClear}>Reset All</button>
-          </div>
-        </section>
       `;
     }
 
@@ -671,6 +1209,9 @@
       const [floatState, setFloatState] = useState(() => {
         try { return JSON.parse(localStorage.getItem(LS_FLOAT_STATE)) || {}; } catch { return {}; }
       });
+      const [salesState, setSalesState] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(LS_SALES_STATE)) || {}; } catch { return {}; }
+      });
       const [meta, setMeta] = useState(() => {
         try { return JSON.parse(localStorage.getItem(LS_META)) || {}; } catch { return {}; }
       });
@@ -682,23 +1223,26 @@
 
       // Sync active state/target based on mode
       const isFloat = activeTab === 'float';
-      const currentState = isFloat ? floatState : state;
-      const setCurrentState = isFloat ? setFloatState : setState;
-      const currentFields = isFloat ? FLOAT_FIELDS : SHIFT_FIELDS;
+      const isSales = activeTab === 'sales';
+      const currentState = isSales ? salesState : (isFloat ? floatState : state);
+      const setCurrentState = isSales ? setSalesState : (isFloat ? setFloatState : setState);
+      const currentFields = isSales ? SALES_FIELDS : (isFloat ? FLOAT_FIELDS : SHIFT_FIELDS);
 
       // Side-effects
       useEffect(() => { localStorage.setItem(LS_STATE, JSON.stringify(state)); }, [state]);
       useEffect(() => { localStorage.setItem(LS_FLOAT_STATE, JSON.stringify(floatState)); }, [floatState]);
+      useEffect(() => { localStorage.setItem(LS_SALES_STATE, JSON.stringify(salesState)); }, [salesState]);
       useEffect(() => { localStorage.setItem(LS_META, JSON.stringify(meta)); }, [meta]);
       useEffect(() => { localStorage.setItem(LS_TAB, activeTab); }, [activeTab]);
-      useEffect(() => { 
-        localStorage.setItem('lotto_v2_viewMode', viewMode); 
+      useEffect(() => {
+        localStorage.setItem('lotto_v2_viewMode', viewMode);
         document.body.className = viewMode === 'cards' ? 'mode-cards' : '';
       }, [viewMode]);
 
       // When tab changes, reset field if it doesn't belong to the new mode
       useEffect(() => {
         if (isFloat && activeField !== 'stock') setActiveField('stock');
+        if (isSales && activeField !== 'sold') setActiveField('sold');
       }, [activeTab]);
 
       const onKeypadPress = (key) => {
@@ -706,16 +1250,15 @@
         setCurrentState(prev => {
           const row = prev[denom] || { stock: '', activated: '', sold: '' };
           let currentVal = row[activeField] || '';
-          if (key === 'del')      currentVal = currentVal.toString().slice(0, -1);
+          if (key === 'del') currentVal = currentVal.toString().slice(0, -1);
           else if (key === 'clr') currentVal = '';
-          else                    currentVal = currentVal.toString() + key.toString();
+          else currentVal = currentVal.toString() + key.toString();
           return { ...prev, [denom]: { ...row, [activeField]: currentVal } };
         });
       };
 
       const onKeypadNext = () => {
-        if (isFloat) {
-          // Float only has 'stock', skip directly to next denom
+        if (isFloat || isSales) {
           if (activeDenomIdx < DENOMS.length - 1) setActiveDenomIdx(activeDenomIdx + 1);
           else setActiveDenomIdx(0);
         } else {
@@ -738,17 +1281,18 @@
       const totalValue = useMemo(() => {
         let sum = 0;
         DENOMS.forEach(d => {
-          const r = calcRow(d, currentState[d], isFloat);
+          const r = calcRow(d, currentState[d], isFloat, isSales);
           if (r && !r.isError && r.value != null && !isNaN(r.value)) {
             sum += r.value;
           }
         });
         return sum;
-      }, [currentState, isFloat]);
+      }, [currentState, isFloat, isSales]);
 
       // Handlers
       const handleClear = () => {
-        if (!confirm(`Clear all ${isFloat ? 'float sheet' : 'shift counter'} entries? This cannot be undone.`)) return;
+        const type = isSales ? 'sales' : (isFloat ? 'float sheet' : 'shift counter');
+        if (!confirm(`Clear all ${type} entries? This cannot be undone.`)) return;
         setCurrentState({});
       };
       const handlePrint = () => window.print();
@@ -758,24 +1302,30 @@
         <${Header} meta=${meta} setMeta=${setMeta} />
         
         <div class="app-tabs">
-          <button class=${`tab-btn ${activeTab === 'shift' ? 'active' : ''}`} onClick=${() => setActiveTab('shift')}>Shift Calculator</button>
-          <button class=${`tab-btn ${activeTab === 'float' ? 'active' : ''}`} onClick=${() => setActiveTab('float')}>Count Float Sheet</button>
+          <button class=${`tab-btn ${activeTab === 'shift' ? 'active' : ''}`} onClick=${() => setActiveTab('shift')}>Shift Data</button>
+          <button class=${`tab-btn ${activeTab === 'float' ? 'active' : ''}`} onClick=${() => setActiveTab('float')}>Float Sheet</button>
+          <button class=${`tab-btn ${activeTab === 'sales' ? 'active' : ''}`} onClick=${() => setActiveTab('sales')}>Daily Sales</button>
         </div>
         
         <main class="container" style="padding-top: 0;">
-          <div style="display: flex; justify-content: center;">
-            <div class="view-toggle" aria-label="Toggle Layout View">
-              <button class=${`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick=${() => setViewMode('table')}>Table View</button>
-              <button class=${`toggle-btn ${viewMode === 'cards' ? 'active' : ''}`} onClick=${() => setViewMode('cards')}>Card View</button>
+          
+          <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div class="stat-card" style="text-align: left; margin: 0; padding: 8px 16px; border-color: var(--green); box-shadow: 0 0 12px var(--green-glow);">
+                <div class="stat-label">Total ${isSales ? 'Sales' : (isFloat ? 'Float' : 'Shift')} Value</div>
+                <div class="stat-value c-green">$${totalValue.toLocaleString()}</div>
+              </div>
+              <div class="view-toggle" aria-label="Toggle Layout View" style="margin: 0; width: auto; flex-shrink: 0;">
+                <button class=${`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick=${() => setViewMode('table')}>Table</button>
+                <button class=${`toggle-btn ${viewMode === 'cards' ? 'active' : ''}`} onClick=${() => setViewMode('cards')}>Card</button>
+              </div>
+            </div>
+            <div class="actions" style="justify-content: flex-start; gap: 8px;">
+              <button class="btn btn-ghost" onClick=${handleExport} style="padding: 6px 12px; font-size: 12px;">Export CSV</button>
+              <button class="btn btn-ghost" onClick=${handlePrint} style="padding: 6px 12px; font-size: 12px;">Print PDF</button>
+              <button class="btn btn-danger" onClick=${handleClear} style="padding: 6px 12px; font-size: 12px;">Reset All</button>
             </div>
           </div>
-
-          ${viewMode === 'cards' ? html`
-            <div class="mobile-total" style="text-align: center; margin-bottom: 12px; flex-shrink: 0;">
-              <div style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Total ${isFloat ? 'Float' : 'Shift'} Value</div>
-              <div style="font-family: var(--font-mono); font-size: 24px; color: var(--green); font-weight: 600; line-height: 1;">$${totalValue.toLocaleString()}</div>
-            </div>
-          ` : html`<div class="section-label">Ticket Denominations</div>`}
           
           ${viewMode === 'table' ? html`
             <div class="table-wrapper">
@@ -784,7 +1334,7 @@
                   <tr>
                     <th class="col-price" scope="col">Price</th>
                     ${currentFields.map(f => html`<th scope="col">${f.label}</th>`)}
-                    ${!isFloat ? html`<th scope="col">Closing</th>` : null}
+                    ${(!isFloat && !isSales) ? html`<th scope="col">Closing</th>` : null}
                     <th scope="col">Value</th>
                   </tr>
                 </thead>
@@ -797,16 +1347,13 @@
                       activeField=${activeField}
                       isActiveRow=${activeDenomIdx === idx}
                       isFloat=${isFloat}
+                      isSales=${isSales}
                       fields=${currentFields}
                       onCellTap=${handleCellTap}
                     />
                   `)}
                 </tbody>
               </table>
-            </div>
-            
-            <div style="margin-top: 24px;">
-              <${VirtualKeypad} onKeyPress=${onKeypadPress} onNext=${onKeypadNext} />
             </div>
           ` : html`
             <div class="carousel-container">
@@ -821,24 +1368,16 @@
                   rowState=${currentState[DENOMS[activeDenomIdx]]} 
                   activeField=${activeField}
                   isFloat=${isFloat}
+                  isSales=${isSales}
                   fields=${currentFields}
                   onCellTap=${handleCellTap}
                 />
               </div>
-              <${VirtualKeypad} onKeyPress=${onKeypadPress} onNext=${onKeypadNext} />
             </div>
           `}
-
-          ${viewMode === 'table' && html`
-            <${SummaryCard} 
-              totalValue=${totalValue}
-              activeTab=${activeTab}
-              onPrint=${handlePrint}
-              onExport=${handleExport}
-              onClear=${handleClear}
-            />
-          `}
         </main>
+
+        <${VirtualKeypad} onKeyPress=${onKeypadPress} onNext=${onKeypadNext} />
       `;
     }
 
@@ -846,4 +1385,5 @@
     render(html`<${App} />`, document.getElementById('app'));
   </script>
 </body>
+
 </html>
