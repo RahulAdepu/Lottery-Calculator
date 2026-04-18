@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap"
     rel="stylesheet" />
 
+
+
   <style>
     /* ============================================================
        RESET & DESIGN TOKENS
@@ -622,7 +624,7 @@
       right: 0;
       z-index: 100;
     }
-    
+
     @media (min-width: 860px) {
       .keypad-container {
         left: 50%;
@@ -759,16 +761,20 @@
         padding: 0 2px 6px;
         letter-spacing: 0;
       }
+
       .cell-price {
         font-size: 13px;
         width: 30px;
         padding-left: 4px !important;
       }
+
       .cell-input {
         padding: 8px 2px;
         font-size: 13px;
       }
-      .cell-result, .cell-value {
+
+      .cell-result,
+      .cell-value {
         padding: 8px 4px;
         font-size: 12px;
       }
@@ -923,7 +929,7 @@
     const html = htm.bind(h);
 
     /* ── Constants ─────────────────────────────────────────────── */
-    const DENOMS = [2, 3, 4, 5, 10, 20, 30, 50];
+    const DENOMS = [2, 3, 4, 5, 10, 30, 50];
     const LS_STATE = 'lotto_v2_state';
     const LS_FLOAT_STATE = 'lotto_v2_float_state';
     const LS_SALES_STATE = 'lotto_v2_sales_state';
@@ -952,7 +958,7 @@
         if (stock === null) return null;
         return { st: stock, isError: false, value: stock * denom };
       }
-      
+
       if (isSales) {
         const sold = raw('sold');
         if (sold === null) return null;
@@ -981,7 +987,7 @@
       const isSales = activeTab === 'sales';
       const date = meta.date || 'N/A';
       const cashier = meta.cashier || 'N/A';
-      
+
       let title = 'Lottery Inventory Report';
       if (isFloat) title = 'Lottery Float Report';
       if (isSales) title = 'Lottery Daily Sales Report';
